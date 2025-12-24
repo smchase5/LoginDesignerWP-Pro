@@ -48,21 +48,31 @@ function logindesignerwp_pro_init() {
         return;
     }
 
-    // Load Pro features (non-namespaced classes)
+    // Load and initialize Pro Features (enables Pro status)
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-pro-features.php';
-    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-presets.php';
-    
-    // Load namespaced classes
-    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-license-handler.php';
-    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-updater.php';
-    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-pro-manager.php';
-
-    // Initialize non-namespaced classes
     new LoginDesignerWP_Pro_Features();
+    
+    // Load and initialize Presets
+    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-presets.php';
     new LoginDesignerWP_Pro_Presets();
     
-    // Initialize namespaced classes
-    new \LoginDesignerWP\Pro\Pro_Manager();
+    // Load License Handler (for license management UI)
+    require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-license-handler.php';
+    $license = new \LoginDesignerWP\Pro\License_Handler();
+    $license->init();
+    
+    // Load Security modules
+    $sec_settings = get_option('logindesignerwp_security_settings', array());
+    
+    if (file_exists(LOGINDESIGNERWP_PRO_PATH . 'inc/security/class-turnstile.php')) {
+        require_once LOGINDESIGNERWP_PRO_PATH . 'inc/security/class-turnstile.php';
+        new \LoginDesignerWP\Pro\Security\Turnstile($sec_settings);
+    }
+    
+    if (file_exists(LOGINDESIGNERWP_PRO_PATH . 'inc/security/class-recaptcha.php')) {
+        require_once LOGINDESIGNERWP_PRO_PATH . 'inc/security/class-recaptcha.php';
+        new \LoginDesignerWP\Pro\Security\ReCaptcha($sec_settings);
+    }
 }
 add_action('plugins_loaded', 'logindesignerwp_pro_init', 20);
 
