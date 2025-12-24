@@ -12,7 +12,6 @@
  * Domain Path: /languages
  * Requires at least: 5.8
  * Requires PHP: 7.4
- * 
  */
 
 // Exit if accessed directly.
@@ -29,10 +28,9 @@ define('LOGINDESIGNERWP_PRO_FILE', __FILE__);
 /**
  * Check if Free version is active
  */
-function logindesignerwp_pro_check_dependencies()
-{
+function logindesignerwp_pro_check_dependencies() {
     if (!function_exists('logindesignerwp_is_pro_active')) {
-        add_action('admin_notices', function () {
+        add_action('admin_notices', function() {
             echo '<div class="notice notice-error"><p>';
             echo '<strong>Login Designer WP Pro</strong> requires <strong>Login Designer WP</strong> (free version) to be installed and activated.';
             echo '</p></div>';
@@ -45,35 +43,33 @@ function logindesignerwp_pro_check_dependencies()
 /**
  * Initialize Pro plugin
  */
-function logindesignerwp_pro_init()
-{
+function logindesignerwp_pro_init() {
     if (!logindesignerwp_pro_check_dependencies()) {
         return;
     }
 
-    // Load Pro features
+    // Load Pro features (non-namespaced classes)
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-pro-features.php';
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-presets.php';
+    
+    // Load namespaced classes
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-license-handler.php';
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-updater.php';
     require_once LOGINDESIGNERWP_PRO_PATH . 'inc/class-pro-manager.php';
 
-    // Initialize
+    // Initialize non-namespaced classes
     new LoginDesignerWP_Pro_Features();
     new LoginDesignerWP_Pro_Presets();
-
-    // Initialize license and updates
-    $license_handler = new LoginDesignerWP_Pro_License_Handler();
-    new LoginDesignerWP_Pro_Updater($license_handler);
-    new LoginDesignerWP_Pro_Manager();
+    
+    // Initialize namespaced classes
+    new \LoginDesignerWP\Pro\Pro_Manager();
 }
 add_action('plugins_loaded', 'logindesignerwp_pro_init', 20);
 
 /**
  * Activation hook
  */
-register_activation_hook(__FILE__, function () {
-    // Set default options if needed
+register_activation_hook(__FILE__, function() {
     if (!get_option('logindesignerwp_pro_activated')) {
         update_option('logindesignerwp_pro_activated', time());
     }
@@ -82,6 +78,6 @@ register_activation_hook(__FILE__, function () {
 /**
  * Deactivation hook
  */
-register_deactivation_hook(__FILE__, function () {
+register_deactivation_hook(__FILE__, function() {
     // Cleanup if needed
 });
